@@ -1,0 +1,28 @@
+# Claude Code Guide
+
+This project is a small, Dockerized approval app used to demo AI-assisted security and testing workflows.
+
+Follow `AGENTS.md` as the source of truth for workflow, commands, and evidence expectations.
+
+## App Shape
+
+- Node.js, Express, TypeScript
+- Postgres 16
+- `pg` for database access
+- `zod` for route parameter parsing
+- Vitest and Supertest for API tests
+- Static HTML in `public/index.html`
+
+## Demo Auth
+
+The app intentionally uses an `x-demo-user` header instead of real authentication. That keeps the authorization bug visible and testable in a few files. Do not replace it with a full auth system during the demo.
+
+Known seeded users:
+
+- `employee-1`
+- `manager-1`
+- `admin-1`
+
+## Main Demo Bug
+
+On `demo-start`, any authenticated demo user can approve a request. The intended fix is to allow only `manager` and `admin` users to approve. Employees should receive `403`.

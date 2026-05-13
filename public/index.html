@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>AI Agent Sandbox Demo</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        line-height: 1.5;
+        color: #17202a;
+        background: #f6f7f9;
+      }
+
+      body {
+        margin: 0;
+      }
+
+      main {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 32px 20px 48px;
+      }
+
+      header {
+        display: flex;
+        justify-content: space-between;
+        gap: 24px;
+        align-items: flex-start;
+        margin-bottom: 28px;
+      }
+
+      h1 {
+        margin: 0 0 8px;
+        font-size: 2rem;
+        line-height: 1.1;
+      }
+
+      p {
+        margin: 0;
+        color: #52606d;
+      }
+
+      .role-picker {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+      }
+
+      button {
+        border: 1px solid #b7c0ca;
+        border-radius: 6px;
+        background: #fff;
+        color: #17202a;
+        cursor: pointer;
+        font: inherit;
+        min-height: 36px;
+        padding: 6px 12px;
+      }
+
+      button:hover {
+        border-color: #65758b;
+      }
+
+      button.active {
+        background: #1f6feb;
+        border-color: #1f6feb;
+        color: #fff;
+      }
+
+      button:disabled {
+        cursor: not-allowed;
+        opacity: 0.55;
+      }
+
+      .requests {
+        display: grid;
+        gap: 12px;
+      }
+
+      .request {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 16px;
+        align-items: center;
+        border: 1px solid #d7dce2;
+        border-radius: 8px;
+        background: #fff;
+        padding: 16px;
+      }
+
+      .request h2 {
+        margin: 0 0 4px;
+        font-size: 1.1rem;
+      }
+
+      .meta {
+        color: #65758b;
+        font-size: 0.95rem;
+      }
+
+      .status {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 999px;
+        padding: 2px 8px;
+        margin-left: 8px;
+        background: #fff4ce;
+        color: #6b4e00;
+        font-size: 0.85rem;
+      }
+
+      .status.approved {
+        background: #dff6e7;
+        color: #175b2f;
+      }
+
+      #message {
+        min-height: 24px;
+        margin-bottom: 12px;
+        color: #8a1f11;
+      }
+
+      @media (max-width: 720px) {
+        header,
+        .request {
+          grid-template-columns: 1fr;
+          display: grid;
+        }
+
+        .role-picker {
+          justify-content: flex-start;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div>
+          <h1>Approval Sandbox</h1>
+          <p>Fake users, fake data, real tests. Switch roles and try approving a request.</p>
+        </div>
+        <div class="role-picker" aria-label="Demo user">
+          <button data-user="employee-1">Employee</button>
+          <button data-user="manager-1">Manager</button>
+          <button data-user="admin-1">Admin</button>
+        </div>
+      </header>
+
+      <div id="message" role="status" aria-live="polite"></div>
+      <section id="requests" class="requests" aria-label="Approval requests"></section>
+    </main>
+
+    <script>
+      const formatter = new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD'
+      });
+
+      let currentUser = 'employee-1';
+
+      function dollars(cents) {
+        return formatter.format(cents / 100);
+      }
+
+      function setMessage(text) {
+        document.querySelector('#message').textContent = text;
+      }
+
+      function setActiveRole() {
+        document.querySelectorAll('[data-user]').forEach((button) => {
+          button.classList.toggle('active', button.dataset.user === currentUser);
+        });
+      }
+
+      async function approveRequest(id) {
+        setMessage('');
+        const response = await fetch(`/api/requests/${id}/approve`, {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json',
+            'x-demo-user': currentUser
+          }
+        });
+
+        if (!response.ok) {
+          const body = await response.json();
+          setMessage(`${response.status}: ${body.error}`);
+        }
+
+        await loadRequests();
+      }
+
+      async function loadRequests() {
+        const response = await fetch('/api/requests');
+        const body = await response.json();
+        const list = document.querySelector('#requests');
+        list.innerHTML = '';
+
+        body.requests.forEach((request) => {
+          const article = document.createElement('article');
+          article.className = 'request';
+          const statusClass = request.status === 'approved' ? ' approved' : '';
+          article.innerHTML = `
+            <div>
+              <h2>${request.title}<span class="status${statusClass}">${request.status}</span></h2>
+              <div class="meta">
+                ${dollars(request.amountCents)} requested by ${request.requestedByName}
+                ${request.approvedByName ? `, approved by ${request.approvedByName}` : ''}
+              </div>
+            </div>
+            <button ${request.status !== 'pending' ? 'disabled' : ''} data-approve="${request.id}">
+              Approve
+            </button>
+          `;
+          list.appendChild(article);
+        });
+
+        document.querySelectorAll('[data-approve]').forEach((button) => {
+          button.addEventListener('click', () => approveRequest(button.dataset.approve));
+        });
+      }
+
+      document.querySelectorAll('[data-user]').forEach((button) => {
+        button.addEventListener('click', () => {
+          currentUser = button.dataset.user;
+          setActiveRole();
+          setMessage('');
+        });
+      });
+
+      setActiveRole();
+      loadRequests();
+    </script>
+  </body>
+</html>
