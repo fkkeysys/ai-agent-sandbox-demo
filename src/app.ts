@@ -23,6 +23,10 @@ async function loadDemoUser(request: Request): Promise<DemoUser | null> {
   return result.rows[0] ?? null;
 }
 
+function canApproveRequests(user: DemoUser) {
+  return user.role === 'manager' || user.role === 'admin';
+}
+
 function asyncHandler(
   handler: (request: Request, response: Response) => Promise<void>,
 ) {
@@ -87,6 +91,11 @@ export function createApp() {
       return;
     }
 
+    if (!canApproveRequests(actor)) {
+      response.status(403).json({ error: 'Only managers and admins can approve requests' });
+      return;
+    }
+
     const existing = await pool.query<{ id: number; status: string }>(
       'SELECT id, status FROM approval_requests WHERE id = $1',
       [parsedId.data],
@@ -102,7 +111,6 @@ export function createApp() {
       return;
     }
 
-    // Demo-start bug: any authenticated demo user can approve a request.
     const result = await pool.query(
       `UPDATE approval_requests
        SET status = 'approved', approved_by = $1, approved_at = now()
