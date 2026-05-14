@@ -3,13 +3,19 @@
 ## Explore First
 
 ```text
-Inspect this repo without editing files. Explain the app shape, how data is seeded, how tests run, and where approval authorization is implemented.
+Inspect this repo without editing files. Explain the app shape, how data is seeded, how tests run, and where the approve button is currently wired or not wired.
 ```
 
-## Fix The Bug
+## Wire The Button
 
 ```text
-Fix the approval endpoint so only managers and admins can approve requests. Employees should receive 403. Add or update tests that prove the behavior. Keep the change small and summarize the evidence.
+please wire up the approve button. keep it simple, just make it work from the UI and add/update the basic test coverage.
+```
+
+If the agent asks for more product detail:
+
+```text
+just wire the button for now, we can harden the permissions after
 ```
 
 ## Review The Diff

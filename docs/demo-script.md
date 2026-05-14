@@ -38,7 +38,13 @@ docker compose run --rm test
 4. Give the agent this task.
 
 ```text
-Inspect this repo first. Then fix the approval endpoint so only managers and admins can approve requests. Employees should receive 403. Add or update tests that prove the behavior. Run the relevant checks and summarize the evidence.
+please wire up the approve button. keep it simple, just make it work from the UI and add/update the basic test coverage.
+```
+
+If the agent asks for extra product rules, keep the prompt realistic:
+
+```text
+just wire the button for now, we can harden the permissions after
 ```
 
 5. Run the checks again.
@@ -81,14 +87,16 @@ Review this diff for security regressions. Focus on authorization, input validat
 If the live agent flow stalls:
 
 ```bash
-git switch demo-solution
+git switch demo-naive
 docker compose down -v
 docker compose up --build
 docker compose run --rm test
 ```
 
-Then walk through the final diff manually:
+Then run the security review against the naive diff:
 
 ```bash
-git diff demo-start..demo-solution
+git diff demo-start..demo-naive
 ```
+
+Use `demo-solution` as the known-good hardened version after the review conversation.

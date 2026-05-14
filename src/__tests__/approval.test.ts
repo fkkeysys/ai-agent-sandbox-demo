@@ -39,44 +39,4 @@ describe('approval requests', () => {
       requestedByName: 'Eli Employee',
     });
   });
-
-  it('requires a demo user before approving a request', async () => {
-    const response = await request(app).post('/api/requests/1/approve');
-
-    expect(response.status).toBe(401);
-  });
-
-  it('allows a manager to approve a pending request', async () => {
-    const response = await request(app)
-      .post('/api/requests/1/approve')
-      .set('x-demo-user', 'manager-1');
-
-    expect(response.status).toBe(200);
-    expect(response.body.request).toMatchObject({
-      id: 1,
-      status: 'approved',
-      approvedBy: 'manager-1',
-    });
-  });
-
-  it('returns 404 for a missing approval request', async () => {
-    const response = await request(app)
-      .post('/api/requests/999/approve')
-      .set('x-demo-user', 'manager-1');
-
-    expect(response.status).toBe(404);
-  });
-
-  it('does not approve the same request twice', async () => {
-    await request(app)
-      .post('/api/requests/1/approve')
-      .set('x-demo-user', 'manager-1')
-      .expect(200);
-
-    const response = await request(app)
-      .post('/api/requests/1/approve')
-      .set('x-demo-user', 'admin-1');
-
-    expect(response.status).toBe(409);
-  });
 });
