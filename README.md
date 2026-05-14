@@ -9,14 +9,15 @@ The app is intentionally small: fake users, fake approval requests, a Postgres d
 - Disposable local environment with Docker and Postgres
 - No real secrets or customer data
 - Repo instructions for coding agents
-- A small security bug that is easy to explain
+- A small missing feature that can create a security bug if implemented too literally
 - API tests as evidence, not vibes
 - A GitHub Actions workflow that runs the same checks
 
 ## Branches
 
-- `demo-start`: intentionally vulnerable starting point for the live demo
-- `demo-solution`: known-good fixed version for recovery and comparison
+- `demo-start`: approve button exists but is not wired yet
+- `demo-naive`: approve button is wired in the straightforward way, useful for review practice
+- `demo-solution`: hardened version for recovery and comparison
 - `main`: polished take-home version
 
 ## Quick Start
@@ -53,15 +54,15 @@ npm test
 
 ## Demo Task
 
-On the `demo-start` branch, a normal employee can approve a request. That is the bug.
+On the `demo-start` branch, the UI displays an Approve button but the button is not wired to a working API path yet.
 
 Ask the coding agent to:
 
 ```text
-Inspect this repo first. Then fix the approval endpoint so only managers and admins can approve requests. Employees should receive 403. Add or update tests that prove the behavior. Run the relevant checks and summarize the evidence.
+please wire up the approve button. keep it simple, just make it work from the UI and add/update the basic test coverage.
 ```
 
-The expected end state is the same behavior as `demo-solution`.
+After the change, run the security review skill against the diff and see what it catches.
 
 ## Reusable Review Skill
 

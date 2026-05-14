@@ -15,7 +15,7 @@ Follow `AGENTS.md` as the source of truth for workflow, commands, and evidence e
 
 ## Demo Auth
 
-The app intentionally uses an `x-demo-user` header instead of real authentication. That keeps the authorization bug visible and testable in a few files. Do not replace it with a full auth system during the demo.
+The app intentionally uses an `x-demo-user` header instead of real authentication. That keeps user context visible and testable in a few files. Do not replace it with a full auth system during the demo.
 
 Known seeded users:
 
@@ -23,6 +23,6 @@ Known seeded users:
 - `manager-1`
 - `admin-1`
 
-## Main Demo Bug
+## Main Demo Task
 
-On `demo-start`, any authenticated demo user can approve a request. The intended fix is to allow only `manager` and `admin` users to approve. Employees should receive `403`.
+On `demo-start`, the Approve button exists in the UI but is not wired to a working API path. Keep the demo small and focused on wiring the button, tests, and review evidence.
