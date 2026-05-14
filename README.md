@@ -63,6 +63,26 @@ Inspect this repo first. Then fix the approval endpoint so only managers and adm
 
 The expected end state is the same behavior as `demo-solution`.
 
+## Reusable Review Skill
+
+This repo includes a focused security review skill for the review part of the demo:
+
+- Codex: `.codex/skills/security-diff-review/SKILL.md`
+- Claude: `.claude/skills/security-diff-review/SKILL.md`
+- Claude Code command: `.claude/commands/security-diff-review.md`
+
+After the agent changes code, use the skill or run the Claude command:
+
+```text
+/security-diff-review
+```
+
+Fallback prompt:
+
+```text
+Review this diff for security regressions. Focus on authorization, input validation, missing actor handling, secret exposure, and database behavior.
+```
+
 ## Important Boundary
 
 Authentication is intentionally fake. The demo uses an `x-demo-user` header so the authorization logic is visible in one small app. Do not copy that auth pattern into production.

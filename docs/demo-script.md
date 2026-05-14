@@ -49,6 +49,20 @@ docker compose run --rm test
 
 6. Ask for a focused review.
 
+Claude Code:
+
+```text
+/security-diff-review
+```
+
+Codex:
+
+```text
+Use the security-diff-review skill to review the current diff.
+```
+
+Fallback prompt:
+
 ```text
 Review this diff for security regressions. Focus on authorization, input validation, missing actor handling, secret exposure, and database behavior. Return only actionable findings with file references and suggested tests.
 ```
