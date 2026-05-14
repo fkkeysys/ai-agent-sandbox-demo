@@ -2,12 +2,12 @@
 
 ## Goal
 
-Show a complete AI-assisted workflow in a disposable sandbox: inspect, plan, patch, test, review, and produce evidence.
+Show a complete AI-assisted workflow in a disposable sandbox: inspect a small AI-style change, run tests, review the diff, and use the review to harden the implementation.
 
 ## Setup Before The Talk
 
 ```bash
-git switch demo-start
+git switch demo-naive
 docker compose down -v
 docker compose up --build
 ```
@@ -35,39 +35,42 @@ Open http://localhost:3000.
 docker compose run --rm test
 ```
 
-4. Give the agent this task.
-
-```text
-please wire up the approve button. keep it simple, just make it work from the UI and add/update the basic test coverage.
-```
-
-If the agent asks for extra product rules, keep the prompt realistic:
-
-```text
-just wire the button for now, we can harden the permissions after
-```
-
-5. Run the checks again.
+4. Show the review target.
 
 ```bash
+git diff demo-start..demo-naive -- public/index.html src/app.ts src/__tests__/approval.test.ts
+```
+
+Talk track:
+
+```text
+This is the kind of change a vague "please wire up the approve button" prompt can produce. The UI works and the basic tests pass, but we still need a security review before treating it as done.
+```
+
+5. Ask Claude for a focused review.
+
+```text
+/security-diff-review demo-start..demo-naive
+```
+
+6. Use the review to move to the hardened version.
+
+Show the known-good diff:
+
+```bash
+git diff demo-naive..demo-solution -- src/app.ts src/__tests__/approval.test.ts
+```
+
+Or switch to the recovery branch:
+
+```bash
+git switch demo-solution
+docker compose down -v
+docker compose up --build
 docker compose run --rm test
 ```
 
-6. Ask for a focused review.
-
-Claude Code:
-
-```text
-/security-diff-review
-```
-
-Codex:
-
-```text
-Use the security-diff-review skill to review the current diff.
-```
-
-Fallback prompt:
+Fallback review prompt:
 
 ```text
 Review this diff for security regressions. Focus on authorization, input validation, missing actor handling, secret exposure, and database behavior. Return only actionable findings with file references and suggested tests.

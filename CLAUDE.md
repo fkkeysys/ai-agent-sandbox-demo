@@ -22,7 +22,3 @@ Known seeded users:
 - `employee-1`
 - `manager-1`
 - `admin-1`
-
-## Main Demo Task
-
-On `demo-start`, the Approve button exists in the UI but is not wired to a working API path. Keep the demo small and focused on wiring the button, tests, and review evidence.
