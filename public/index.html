@@ -176,6 +176,24 @@
         });
       }
 
+      async function approveRequest(id) {
+        setMessage('');
+        const response = await fetch(`/api/requests/${id}/approve`, {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json',
+            'x-demo-user': currentUser
+          }
+        });
+
+        if (!response.ok) {
+          const body = await response.json();
+          setMessage(`${response.status}: ${body.error}`);
+        }
+
+        await loadRequests();
+      }
+
       async function loadRequests() {
         const response = await fetch('/api/requests');
         const body = await response.json();

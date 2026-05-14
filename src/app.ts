@@ -74,5 +74,44 @@ export function createApp() {
     response.json({ requests: result.rows });
   }));
 
+  app.post('/api/requests/:id/approve', asyncHandler(async (request, response) => {
+    const actor = await loadDemoUser(request);
+    if (!actor) {
+      response.status(401).json({ error: 'Missing or invalid x-demo-user header' });
+      return;
+    }
+
+    const parsedId = idParamSchema.safeParse(request.params.id);
+    if (!parsedId.success) {
+      response.status(400).json({ error: 'Invalid request id' });
+      return;
+    }
+
+    const existing = await pool.query<{ id: number; status: string }>(
+      'SELECT id, status FROM approval_requests WHERE id = $1',
+      [parsedId.data],
+    );
+
+    if (!existing.rows[0]) {
+      response.status(404).json({ error: 'Approval request not found' });
+      return;
+    }
+
+    if (existing.rows[0].status !== 'pending') {
+      response.status(409).json({ error: 'Approval request is not pending' });
+      return;
+    }
+
+    const result = await pool.query(
+      `UPDATE approval_requests
+       SET status = 'approved', approved_by = $1, approved_at = now()
+       WHERE id = $2
+       RETURNING id, title, status, approved_by AS "approvedBy"`,
+      [actor.id, parsedId.data],
+    );
+
+    response.json({ request: result.rows[0] });
+  }));
+
   return app;
 }

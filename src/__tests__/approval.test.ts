@@ -39,4 +39,39 @@ describe('approval requests', () => {
       requestedByName: 'Eli Employee',
     });
   });
+
+  it('requires a demo user before approving a request', async () => {
+    const response = await request(app).post('/api/requests/1/approve');
+
+    expect(response.status).toBe(401);
+  });
+
+  it('approves a pending request for the selected demo user', async () => {
+    const response = await request(app)
+      .post('/api/requests/1/approve')
+      .set('x-demo-user', 'employee-1');
+
+    expect(response.status).toBe(200);
+    expect(response.body.request).toMatchObject({
+      id: 1,
+      status: 'approved',
+      approvedBy: 'employee-1',
+    });
+  });
+
+  it('returns 400 for an invalid approval request id', async () => {
+    const response = await request(app)
+      .post('/api/requests/not-a-number/approve')
+      .set('x-demo-user', 'employee-1');
+
+    expect(response.status).toBe(400);
+  });
+
+  it('returns 404 for a missing approval request', async () => {
+    const response = await request(app)
+      .post('/api/requests/999/approve')
+      .set('x-demo-user', 'employee-1');
+
+    expect(response.status).toBe(404);
+  });
 });
